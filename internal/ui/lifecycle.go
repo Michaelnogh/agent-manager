@@ -649,6 +649,9 @@ func (m *Model) killSession(sess store.Session) error {
 }
 
 func (m *Model) archiveSelected() (tea.Model, tea.Cmd) {
+	if m.showArchived {
+		return m, nil
+	}
 	entry, ok := m.selectedRow()
 	if !ok {
 		return m, nil

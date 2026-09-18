@@ -88,6 +88,25 @@ func TestCreateArchiveRestoreDelete(t *testing.T) {
 	}
 }
 
+func TestArchiveSelectedNoopInArchivedView(t *testing.T) {
+	m := buildModel(t)
+	dir := t.TempDir()
+
+	createSession(t, m, "alpha", dir, "")
+	m.selectSessionRow(t, "alpha")
+	m.archiveSelected()
+	_, cmd := m.handleConfirmKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("y")})
+	m.applyCmd(t, cmd)
+
+	m.showArchived = true
+	m.applyCmd(t, m.refreshCmd())
+	m.selectSessionRow(t, "alpha")
+	m.archiveSelected()
+	if m.mode == modeConfirmDelete {
+		t.Fatal("archiveSelected should not open a confirm dialog in the archived view")
+	}
+}
+
 func TestDeleteGroupSubtree(t *testing.T) {
 	m := buildModel(t)
 	dir := t.TempDir()
