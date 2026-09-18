@@ -105,6 +105,24 @@ func TestArchiveSelectedNoopInArchivedView(t *testing.T) {
 	if m.mode == modeConfirmDelete {
 		t.Fatal("archiveSelected should not open a confirm dialog in the archived view")
 	}
+
+	if err := m.store.CreateGroup("zone", ""); err != nil {
+		t.Fatalf("create group: %v", err)
+	}
+	m.showArchived = false
+	m.applyCmd(t, m.refreshCmd())
+	createSession(t, m, "beta", dir, "zone")
+	if err := m.store.SetArchived(m.sessionRows()[0].ID, true); err != nil {
+		t.Fatalf("archive: %v", err)
+	}
+
+	m.showArchived = true
+	m.applyCmd(t, m.refreshCmd())
+	m.selectGroupRow(t, "zone")
+	m.archiveSelected()
+	if m.mode == modeConfirmDelete {
+		t.Fatal("archiveSelected should not open a confirm dialog for a group row in the archived view")
+	}
 }
 
 func TestDeleteGroupSubtree(t *testing.T) {
