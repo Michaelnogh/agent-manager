@@ -585,7 +585,7 @@ func (m *Model) rowLegend() legendSection {
 		pairs = append(pairs, [][2]string{
 			{k(keybind.Editor), "editor"}, {k(keybind.Rename), "rename"}, {k(keybind.Move), "move"},
 			m.legendPair(keybind.Kill, "kill", keybind.KillAll, "all"), m.legendPair(keybind.Revive, "revive", keybind.ReviveAll, "all"),
-			m.legendPair(keybind.Archive, "archive", keybind.Restore, "restore"), {k(keybind.Delete), "delete"},
+			m.archiveRestoreLegend(), {k(keybind.Delete), "delete"},
 		}...)
 		return legendSection{title: "Group", pairs: legendPairsBound(pairs)}
 	}
@@ -609,9 +609,19 @@ func (m *Model) rowLegend() legendSection {
 	pairs = append(pairs, [][2]string{
 		{k(keybind.Editor), "editor"}, {k(keybind.Rename), "rename"}, {k(keybind.Move), "move"},
 		m.legendPair(keybind.Kill, "kill", keybind.KillAll, "all"), m.legendPair(keybind.Revive, "revive", keybind.ReviveAll, "all"), {k(keybind.Restart), "restart"},
-		m.legendPair(keybind.Archive, "archive", keybind.Restore, "restore"), {k(keybind.Delete), "delete"},
+		m.archiveRestoreLegend(), {k(keybind.Delete), "delete"},
 	}...)
 	return legendSection{title: title, pairs: legendPairsBound(pairs)}
+}
+
+// archiveRestoreLegend drops archive from the pair in the archived view: the
+// key is bound there but archiveSelected no-ops on an already-archived row,
+// so offering it would name a dead key.
+func (m *Model) archiveRestoreLegend() [2]string {
+	if m.showArchived {
+		return [2]string{m.listGlyph(keybind.Restore), "restore"}
+	}
+	return m.legendPair(keybind.Archive, "archive", keybind.Restore, "restore")
 }
 
 func (m *Model) legendPair(first, firstLabel, second, secondLabel string) [2]string {

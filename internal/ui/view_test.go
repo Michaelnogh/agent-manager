@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -773,5 +774,46 @@ func TestFooterInFocusModeNamesTheKeyTable(t *testing.T) {
 	rule := ansi.Strip(focusTopRule(80, m.keys))
 	if !strings.Contains(rule, "f9 back") || !strings.Contains(rule, "alt+e editor") || strings.Contains(rule, "review") {
 		t.Fatalf("split focus rule should follow the table:\n%s", rule)
+	}
+}
+
+// In the archived view, archiveSelected no-ops, so the legend should offer
+// only restore, on both a session row and a group row.
+func TestRowLegendDropsArchiveInArchivedView(t *testing.T) {
+	m := buildModel(t)
+	dir := t.TempDir()
+
+	if err := m.store.CreateGroup("zone", ""); err != nil {
+		t.Fatalf("create group: %v", err)
+	}
+	m.applyCmd(t, m.refreshCmd())
+	createSession(t, m, "alpha", dir, "zone")
+	if err := m.store.SetArchived(m.sessionRows()[0].ID, true); err != nil {
+		t.Fatalf("archive: %v", err)
+	}
+
+	m.showArchived = true
+	m.applyCmd(t, m.refreshCmd())
+
+	m.selectSessionRow(t, "alpha")
+	legend := m.rowLegend()
+	for _, pair := range legend.pairs {
+		if strings.Contains(pair[1], "archive") {
+			t.Fatalf("session legend in archived view should not offer archive, got %+v", pair)
+		}
+	}
+	if !slices.ContainsFunc(legend.pairs, func(pair [2]string) bool { return pair[1] == "restore" }) {
+		t.Fatal("session legend in archived view should still offer restore")
+	}
+
+	m.selectGroupRow(t, "zone")
+	legend = m.rowLegend()
+	for _, pair := range legend.pairs {
+		if strings.Contains(pair[1], "archive") {
+			t.Fatalf("group legend in archived view should not offer archive, got %+v", pair)
+		}
+	}
+	if !slices.ContainsFunc(legend.pairs, func(pair [2]string) bool { return pair[1] == "restore" }) {
+		t.Fatal("group legend in archived view should still offer restore")
 	}
 }
