@@ -326,7 +326,7 @@ func (m *Model) filterBadgeLines() []string {
 	if m.statusFilter.active() {
 		badge(strings.ToUpper(m.statusFilter.label()), "w", "show all")
 	}
-	if m.hideEmptyGroups {
+	if m.hideEmptyGroups && !m.showArchived {
 		badge("HIDE EMPTY", "e", "show empty")
 	}
 	return lines

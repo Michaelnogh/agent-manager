@@ -721,6 +721,31 @@ func TestFooterTogglesNameTheNextAction(t *testing.T) {
 	}
 }
 
+// Hiding empty groups filters the active list only, so the archived view
+// must not offer a key that does nothing there.
+func TestLegendOffersEmptyGroupsOnlyInTheActiveView(t *testing.T) {
+	m := buildModel(t)
+	offered := func() bool {
+		for _, pair := range m.viewLegend().pairs {
+			if pair[1] == "hide empty" || pair[1] == "show empty" {
+				return true
+			}
+		}
+		return false
+	}
+	if !offered() {
+		t.Fatal("the active view should offer hiding empty groups")
+	}
+	m.hideEmptyGroups = true
+	if !offered() {
+		t.Fatal("the active view should offer showing empty groups again")
+	}
+	m.showArchived = true
+	if offered() {
+		t.Fatal("the archived view should not offer the empty-groups key")
+	}
+}
+
 // The status bar carries git and filesystem errors, whose text quotes a path
 // or a ref that can hold control bytes, on both the failure and the outcome
 // branch.

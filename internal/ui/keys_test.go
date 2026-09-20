@@ -209,6 +209,34 @@ func TestToggleEmptyGroupsFiltersTreeWithoutDeletingGroups(t *testing.T) {
 	}
 }
 
+func TestHideEmptyGroupsDoesNotFilterTheArchivedView(t *testing.T) {
+	m := buildModel(t)
+	if err := m.store.CreateGroup("empty", ""); err != nil {
+		t.Fatalf("create group: %v", err)
+	}
+	m.applyCmd(t, m.refreshCmd())
+	m.selectGroupRow(t, "empty")
+	m.archiveSelected()
+	_, cmd := m.handleConfirmKey(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune("y")})
+	m.applyCmd(t, cmd)
+
+	if err := m.store.CreateGroup("bare", ""); err != nil {
+		t.Fatalf("create group: %v", err)
+	}
+	m.hideEmptyGroups = true
+	m.showArchived = true
+	m.applyCmd(t, m.refreshCmd())
+	if got, want := m.groupRowPaths(), []string{"empty"}; !slices.Equal(got, want) {
+		t.Fatalf("archived view with hide-empty on should keep the archived empty group, got %v want %v", got, want)
+	}
+
+	m.showArchived = false
+	m.applyCmd(t, m.refreshCmd())
+	if got := m.groupRowPaths(); len(got) != 0 {
+		t.Fatalf("active view with hide-empty on should still hide empty groups, got %v", got)
+	}
+}
+
 func TestArchivedViewIgnoresFold(t *testing.T) {
 	m := buildModel(t)
 	dir := t.TempDir()

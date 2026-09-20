@@ -886,7 +886,6 @@ func TestFilterBadgesStackOverTheList(t *testing.T) {
 	want := [][2]string{
 		{"ARCHIVED", "t back to active"},
 		{"ATTENTION", "w show all"},
-		{"HIDE EMPTY", "e show empty"},
 	}
 	if len(painted) < len(want) {
 		t.Fatalf("rail painted %d lines, want the %d badges first:\n%s", len(painted), len(want), rail)
@@ -904,6 +903,24 @@ func TestFilterBadgesStackOverTheList(t *testing.T) {
 	for _, unwanted := range []string{"ARCHIVED", "ATTENTION", "HIDE EMPTY"} {
 		if strings.Contains(header, unwanted) {
 			t.Errorf("header still carries the %s badge:\n%s", unwanted, header)
+		}
+	}
+}
+
+// Hiding empty groups is a filter of the active list; the archive rail never
+// names it, since the archived view ignores the flag.
+func TestHideEmptyBadgeBelongsToTheActiveRail(t *testing.T) {
+	m := shotModel()
+	m.width, m.height = 120, 40
+	m.hideEmptyGroups = true
+	for _, tc := range []struct {
+		archived bool
+		want     bool
+	}{{false, true}, {true, false}} {
+		m.showArchived = tc.archived
+		rail := ansi.Strip(railLinesText(m.railLines(36, m.listBodyHeight())))
+		if got := strings.Contains(rail, "HIDE EMPTY"); got != tc.want {
+			t.Errorf("showArchived=%v: HIDE EMPTY painted = %v, want %v:\n%s", tc.archived, got, tc.want, rail)
 		}
 	}
 }
