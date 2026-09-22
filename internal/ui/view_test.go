@@ -721,8 +721,6 @@ func TestFooterTogglesNameTheNextAction(t *testing.T) {
 	}
 }
 
-// Hiding empty groups filters the active list only, so the archived view
-// must not offer a key that does nothing there.
 func TestLegendOffersEmptyGroupsOnlyInTheActiveView(t *testing.T) {
 	m := buildModel(t)
 	offered := func() bool {

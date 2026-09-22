@@ -2121,7 +2121,6 @@ func (m *Model) rebuildRows() {
 		// This is a presentation filter only: stored groups remain available
 		// to forms and return to the tree as soon as the toggle is switched
 		// off. Ancestors of groups with visible sessions stay in the tree.
-		// The archived view is exempt: it already lists archived groups whole.
 		paths = pathsWithSessions(paths, sessionsByGroup)
 	}
 	children := childIndex(paths, m.groups)

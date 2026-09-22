@@ -907,8 +907,6 @@ func TestFilterBadgesStackOverTheList(t *testing.T) {
 	}
 }
 
-// Hiding empty groups is a filter of the active list; the archive rail never
-// names it, since the archived view ignores the flag.
 func TestHideEmptyBadgeBelongsToTheActiveRail(t *testing.T) {
 	m := shotModel()
 	m.width, m.height = 120, 40
